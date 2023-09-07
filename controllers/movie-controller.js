@@ -7,7 +7,7 @@ import asyncHandler from 'express-async-handler';
 //Type -- POST
 //@access -- private
 const createMovie = asyncHandler(async(req, res) =>{
-    if (req.user.isAdmin) {
+  if (req.user.isAdmin) {
         const newMovie = new Movie(req.body);
         try {
           const savedMovie = await newMovie.save();
@@ -32,7 +32,7 @@ const createMovie = asyncHandler(async(req, res) =>{
 //@access -- private
 
 const updateMovie = asyncHandler(async (req,res) =>{
-    if (req.user.isAdmin) {
+  if (req.user.isAdmin) {
         try {
             
             const movie = await Movie.findById(req.params.id);
@@ -154,11 +154,98 @@ const getAllMovies = asyncHandler(async (req,res)=>{
 });
 
 
+const getMoviesByGenre = asyncHandler(async (req, res) => {
+  const genre = req.query.genre;
+
+  try {
+    const movies = await Movie.find({ genre: genre });
+    res.status(200).json(movies);
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong", error });
+  }
+});
+
+
+const getMoviesByGenreAndType = asyncHandler(async (req, res) => {
+  const genre = req.query.genre;
+  const isSeries = req.query.isSeries; // 'true' or 'false' as a string
+
+  try {
+    let query = { genre: genre };
+
+    if (isSeries === 'true') {
+      query.isSeries = true;
+    } else if (isSeries === 'false') {
+      query.isSeries = false;
+    }
+
+
+
+    const movies = await Movie.find(query);
+    res.status(200).json(movies);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong', error });
+  }
+});
+
+
+const getRandomMovieByGenreAndType = asyncHandler(async (req, res) => {
+  const genre = req.query.genre;
+  const type = req.query.type;
+
+  try {
+    let query = { genre: genre };
+
+    if (type === 'movie') {
+      query.isSeries = false;
+    } else if (type === 'series') {
+      query.isSeries = true;
+    }
+
+    const randomMovie = await Movie.aggregate([
+      { $match: query },
+      { $sample: { size: 1 } },
+    ]);
+
+    if (randomMovie.length === 0) {
+      res.status(404).json({ message: 'No matching movie or series found' });
+    } else {
+      res.status(200).json(randomMovie[0]);
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong', error });
+  }
+});
+
+const getRandomMoviesAndSeries = asyncHandler(async (req, res) => {
+  try {
+    // Query 8 random movies
+    const randomMovies = await Movie.aggregate([
+      { $match: { isSeries: false } }, // Filter for movies
+      { $sample: { size: 8 } }, // Get 8 random movies
+    ]);
+
+    // Query 8 random series
+    const randomSeries = await Movie.aggregate([
+      { $match: { isSeries: true } }, // Filter for series
+      { $sample: { size: 8 } }, // Get 8 random series
+    ]);
+
+    // Combine the results (movies and series)
+    const randomMoviesAndSeries = [...randomMovies, ...randomSeries];
+
+    res.status(200).json(randomMoviesAndSeries);
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong', error });
+  }
+});
 
 
 
 
-export {createMovie, updateMovie, deleteMovie, getMovie, getRandomMovie, getAllMovies};
+
+
+export {createMovie, updateMovie, deleteMovie, getMovie, getRandomMovie, getAllMovies, getMoviesByGenre, getMoviesByGenreAndType, getRandomMovieByGenreAndType, getRandomMoviesAndSeries};
 
 
 

@@ -6,7 +6,8 @@ import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 router.post("/", protect, async (req, res) => {
-  if (req.user.isAdmin) {
+   if (req.user.isAdmin) {
+    
     const newList = new List(req.body);
     try {
       const savedList = await newList.save();
@@ -22,7 +23,7 @@ router.post("/", protect, async (req, res) => {
 //DELETE
 
 router.delete("/:id", protect, async (req, res) => {
-  if (req.user.isAdmin) {
+   if (req.user.isAdmin) {
     try {
       await List.findByIdAndDelete(req.params.id);
       res.status(201).json("The list has been delete...");
@@ -36,7 +37,7 @@ router.delete("/:id", protect, async (req, res) => {
 
 //GET
 
-router.get("/", protect, async (req, res) => {
+router.get("/", async (req, res) => {
   const typeQuery = req.query.type;
   const genreQuery = req.query.genre;
   let list = [];
@@ -56,6 +57,15 @@ router.get("/", protect, async (req, res) => {
     } else {
       list = await List.aggregate([{ $sample: { size: 10 } }]);
     }
+    res.status(200).json(list);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.get("/new-releases", async (req, res) => {
+  try {
+    const list = await List.find({ genre: "NewReleases" });
     res.status(200).json(list);
   } catch (err) {
     res.status(500).json(err);

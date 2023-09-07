@@ -50,7 +50,7 @@ const updateUser = asyncHandler(async (req,res) =>{
 
 
 const deleteUser = asyncHandler(async (req,res) =>{
-    if (req.user.id === req.params.id) {
+    if (req.user.isAdmin) {
         const userIdToDelete = req.user.id; // Replace with the actual user ID you want to delete
         try {
             const result = await User.deleteOne({ _id: userIdToDelete });
@@ -63,7 +63,7 @@ const deleteUser = asyncHandler(async (req,res) =>{
                 res.status(500).json(error);
             }
     }else{
-        res.status(403).json("You can delete only your account!");
+        res.status(403).json("Not Authorized");
     }
 });
 
@@ -101,7 +101,7 @@ const getUser = asyncHandler(async (req,res)=>{
 
 const getAllUser = asyncHandler(async (req,res)=>{
     const query = req.query.new;
-    if (req.user.isAdmin) {
+     if (req.user.isAdmin) {
         try {
             const users = query
               ? await User.find().sort({ _id: -1 }).limit(5)
