@@ -9,7 +9,9 @@ import userRouter from "./routes/users.js";
 import movieRouter from './routes/movies.js'
 import listRouter from './routes/lists.js'
 connectDB();
+import cors from 'cors';
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use('/api/auth', authRouter);
