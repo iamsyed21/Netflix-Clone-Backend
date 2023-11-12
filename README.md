@@ -9,9 +9,6 @@
 <p align="center">
   <img src="/ss1.png" alt="Application screenshot" />
 </p>
-<p align="center">
-  Discover the intricate design and layout of NotFlix, showcasing the deep understanding of Netflix's user interface.
-</p>
 
 <p align="center">
   <img src="/ss2.png" alt="Application screenshot" />
